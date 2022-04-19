@@ -23,11 +23,11 @@ def create(request):
             article.user = request.user
             article.save()
             return redirect('articles:detail', article.pk)
-        else:
-            form = ArticleForm()
-        context = {
-            'form': form
-        }
+    else:
+        form = ArticleForm()
+    context = {
+        'form': form,
+    }
     return render(request, 'articles/create.html', context)
 
 @require_safe
