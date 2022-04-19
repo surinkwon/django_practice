@@ -1,7 +1,8 @@
+from xml.etree.ElementTree import Comment
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST, require_safe
 from .models import Article
-from .forms import ArticleForm
+from .forms import ArticleForm, CommentForm
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
@@ -38,6 +39,17 @@ def detail(request, pk):
             article.delete()
     return redirect('articles:index')
 
+
+@require_POST
+def delete(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+    if request.user.is_authenticated:
+        if request.user == article.user:
+            article.delete()
+    return redirect('articles:index')
+
+
+
 @login_required
 @require_http_methods(['GET', 'POST'])
 def update(request, pk):
@@ -56,3 +68,36 @@ def update(request, pk):
         'form': form,
     }
     return render(request, 'articles/update.html', context)
+
+@require_POST
+def comment_create(request, pk):
+    if request.user.is_authenticated:
+        article = get_object_or_404(Article, pk=pk)
+        comment_form = CommentForm
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.article = article
+            comment.user = request.user
+            comment.save()
+        return redirect('articles:detail', article=pk)
+    return redirect('accounts:login')
+
+
+@require_POST
+def comment_delete(request, article_pk, comment_pk):
+    if request.user.is_authenticated:
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        if request.user == comment.user:
+            comment.save()
+    return redirect('articles:detail', article_pk)
+
+@require_POST
+def likes(request, article_pk):
+    if request.user.is_authenticated:
+        article = get_object_or_404(Article, pk=article_pk)
+        if article.like_users.filter(pk=request.user.pk).exist():
+            article.like_users.remove(request.user)
+        else:
+            article.like_users_add(request.user)
+        return redirect('articles:index')
+    return redirect('accounts:login')

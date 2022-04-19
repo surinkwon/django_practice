@@ -16,4 +16,30 @@
       <input type="submit" value="삭제">
     </form>
   {% endif %}
-  <a href="{% url 'articles:index' %}">back</a>
+  <a href={% url 'articles:index' %}>뒤로가기</a>
+  <hr>
+  <h3>댓글 목록</h3>
+  <ul>
+    {% for comment in comments %}
+      <li>
+        {{ comment.user }} - {{ comment.content }}
+        {% if request.user == comment.user %}
+          <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" value="삭제">
+          </form>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <hr>
+  {% if request.user.is_authenticated %}
+    <form action="{% url 'articles:comment_create' article.pk %}" method="POST">
+      {% csrf_token %}
+      {{ comment_form }}
+      <input type="submit">
+    </form>
+  {% else %}
+    <a href="{% url 'accounts:login' %}">댓글을 작성하려면 로그인하세요.</a>
+  {% endif %}
+{% endblock content %}
