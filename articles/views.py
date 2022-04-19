@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST, require_safe
 from .models import Article, Comment
-from .forms import ArticleForm, CommentForm
+from .forms import ArticleForm, CommentForm, RecommentForm
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
@@ -33,12 +33,16 @@ def create(request):
 @require_safe
 def detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
-    comments = article.comment_set.all()
+    comments = article.comment_set.filter(recomment_id__isnull=True)
+    recomments = article.comment_set.all()
     comment_form = CommentForm()
+    recomment_form = RecommentForm()
     context = {
         'article': article,
         'comments': comments,
         'comment_form': comment_form,
+        'recomment_form': recomment_form,
+        'recomments': recomments,
     }
     return render(request, 'articles/detail.html', context)
 
@@ -96,7 +100,6 @@ def comment_delete(request, article_pk, comment_pk):
 
 @require_POST
 def likes(request, article_pk):
-    print('asfdsf')
     if request.user.is_authenticated:
         article = get_object_or_404(Article, pk=article_pk)
         if article.like_users.filter(pk=request.user.pk).exists():
@@ -104,4 +107,20 @@ def likes(request, article_pk):
         else:
             article.like_users.add(request.user)
         return redirect('articles:index')
+    return redirect('accounts:login')
+
+
+@require_POST
+def recomment_create(request, article_pk, comment_pk):
+    if request.user.is_authenticated:
+        article = get_object_or_404(Article, pk=article_pk)
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        recomment_form = RecommentForm(request.POST)
+        if recomment_form.is_valid():
+            recomment = recomment_form.save(commit=False)
+            recomment.article = article
+            recomment.user = request.user
+            recomment.recomment = comment
+            recomment.save()
+        return redirect('articles:detail', article.pk)
     return redirect('accounts:login')

@@ -23,6 +23,27 @@
     {% for comment in comments %}
       <li>
         <p>{{ comment.user }} - {{ comment.content }}</p>
+        <form action="{% url 'articles:recomment_create' article.pk comment.pk %}" method="post">
+          {% csrf_token %}
+          {{ recomment_form }}
+          <input type="submit">
+        </form>
+        <ul>
+          <p>대댓글 목록</p>
+          {% for recomment in recomments %}
+            {% if recomment.recomment_id == comment.pk %}
+              <li>
+                <p>{{ recomment.user }} - {{ recomment.content }}</p>
+                {% if request.user == recomment.user %}
+                  <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" value="삭제">
+                  </form>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
         {% if request.user == comment.user %}
           <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST">
             {% csrf_token %}
