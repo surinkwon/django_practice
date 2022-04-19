@@ -2,15 +2,21 @@
 
 {% block content %}
   <h1>{{ person.username }}님의 프로필</h1>
+  {% if request.user != person %}
+    <form action="{% url 'accounts:follow' person.id %}" method="post">
+      {% csrf_token %}
+      {% if request.user in person.follwers.all %}
+        <input type="submit" value="Unfollow">
+      {% else %}
+        <input type="submit" value="Follow">
+      {% endif %}
+    </form>
+  {% endif %}
   <p>팔로워: {{ person.followers.all|length }}/ 팔로우: {{ person.followings.all|length }}</p>
-  <form action="{% url 'accounts:follow' person.id %}" method="post">
-    {% csrf_token %}
-    {% if request.user in person.follwers.all %}
-      <input type="submit" value="Unfollow">
-    {% else %}
-      <input type="submit" value="Follow">
-    {% endif %}
-  </form>
+    <h4>팔로워 목록</h4>
+  {% for follower in person.followers.all %}
+    <p>{{ follower.username }}</p>
+  {% endfor %}
 
   <h2>{{ person.username }}님이 작성한 글</h2>
   {% for article in person.article_set.all %}
@@ -27,5 +33,5 @@
     {% for comment in person.comment_set.all %}
       <p>{{ comment.content }}</p>
     {% endfor %}
-
+    <a href="{% url 'articles:index' %}">BACK</a>
 {% endblock content %}

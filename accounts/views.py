@@ -93,7 +93,7 @@ def change_password(request):
         context = {
             'form': form,
         }
-        return render(request, 'accounts/change_password.html', context)
+        return render(request, 'accounts/password.html', context)
     return redirect('accounts:login')
 
 
