@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>SIGNUP</h1>
+  <form action="{% url 'accounts:signup' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Signup">
+  </form>
+
+  <a href="{% url 'articles:index' %}">BACK</a>
+
+{% endblock content %}
