@@ -28,7 +28,7 @@ def create(request):
         context = {
             'form': form
         }
-        return render(request, 'articles/create.html', context)
+    return render(request, 'articles/create.html', context)
 
 @require_safe
 def detail(request, pk):
