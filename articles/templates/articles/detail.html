@@ -22,7 +22,7 @@
   <ul>
     {% for comment in comments %}
       <li>
-        {{ comment.user }} - {{ comment.content }}
+        <p>{{ comment.user }} - {{ comment.content }}</p>
         {% if request.user == comment.user %}
           <form action="{% url 'articles:comment_delete' article.pk comment.pk %}" method="POST">
             {% csrf_token %}
